@@ -73,6 +73,11 @@ func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 		}
 		store.workDir = workDir
 	}
+	// If has a disk driver name, add it to path
+	if ok, v := findOpt("name", pairs); ok {
+		driver := v.(string)
+		store.workDir = driver + store.workDir
+	}
 
 	// Check and create work dir
 	err = os.MkdirAll(store.workDir, 0755)
@@ -80,6 +85,15 @@ func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 		return nil, err
 	}
 	return
+}
+
+func findOpt(key string, opts []typ.Pair) (bool, interface{}) {
+	for _, v := range opts {
+		if v.Key == key {
+			return true, v.Value
+		}
+	}
+	return false, nil
 }
 
 func formatError(err error) error {
